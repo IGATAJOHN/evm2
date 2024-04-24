@@ -1,0 +1,138 @@
+{% extends 'base.html'%}
+{% block content %}
+<div class="container dashboard">
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <a class="navbar-brand" href="#"><h1>Dashboard</h1></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto" style="margin-left: 800px;">
+                <li class="nav-item">
+                    <div class="d-flex align-items-center">
+                        <img src="{{url_for('static',filename='asset/profile.jpg')}}" alt="Profile Picture" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 10px;">
+                        <span class="ml-2">Manager</span>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle pl-0" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       <span class="sr-only">Toggle Dropdown</span>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Logout</a>
+                    </div>
+                </li>
+            </ul>   
+        </div>
+    </nav>
+ 
+    <div class="container mt-5 forms">
+        <div class="card" style="height: 700px;width: 500px;">
+            <div class="card-body">
+                <h2 class="card-title">Add New User</h2>
+                <h5 class="card-subtitle mb-2 text-muted">Please enter new user details</h5>
+                <form method="POST" action="{{ url_for('add_user') }}" enctype="multipart/form-data" id="addUserForm">
+                    <div class="form-group" style="text-align: left; margin-bottom: 20px;">
+                        <label for="fullname">Fullname</label>
+                        <input type="text" class="form-control" id="fullname" placeholder="Enter your fullname" name="fullname" required/>
+                    </div>
+                    <div class="form-group" style="text-align: left; margin-bottom: 20px;">
+                        <label for="username">Username</label>
+                        <input type="text" class="form-control" id="username" placeholder="Enter your username" name="username" required/>
+                    </div>
+                    <div class="form-group" style="text-align: left; margin-bottom: 20px;">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" placeholder="Enter your email" name="email" required/>
+                    </div>
+                    <div class="form-group" style="text-align: left; margin-bottom: 20px;">
+                        <label for="userRole">User Role</label>
+                        <select class="form-control" id="userRole" name="user_role">
+                            <option>Select user role...</option>
+                            <option>Admin</option>
+                            <option>User</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="text-align: left; margin-bottom: 20px;">
+                        <label for="password">Password</label>
+                        <input type="password" class="form-control" id="password" placeholder="Enter your password" name="password" required/>
+                    </div>
+                        <!-- Custom image upload field -->
+                        <div class="form-group"style="text-align: left; margin-bottom: 20px;">
+                            <label for="coverPhoto">Choose a cover photo to upload</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="coverPhoto" accept=".jpg, .png" name="photo">
+                                <label class="custom-file-label" for="coverPhoto">JPEG, PNG, up to 2MB</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add User</button>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+      <!-- JavaScript to show SweetAlert on form submission success -->
+<script>
+ document.getElementById('addUserForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the form from submitting normally
+    
+    // Perform additional validation before submitting the form
+    var username = document.getElementById('username').value;
+    var email = document.getElementById('email').value;
+    
+    // Regular expression to match usernames without '@' symbol
+    var usernameRegex = /^[^@\s]+$/;
+
+    if (!usernameRegex.test(username)) {
+        // Show error message if username contains '@' symbol
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Username cannot contain the "@" symbol.'
+        });
+        return; // Prevent form submission
+    }
+
+    // Submit the form via AJAX
+    fetch(this.action, {
+        method: this.method,
+        body: new FormData(this)
+    })
+    .then(response => {
+        if (response.ok) {
+            // If the response is successful, show a success message
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'User added successfully.',
+                confirmButtonColor: '#007bff', // Set the color of the "OK" button to blue
+                onClose: () => {
+                    window.location.href = '{{ url_for("users") }}';
+                }
+            });
+        } else {
+            // If there was an error, show an error message
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong!'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        // If there was a network error, show an error message
+        Swal.fire({
+            icon: 'error',
+            title: 'Network Error',
+            text: 'Failed to add user. Please try again later.'
+        });
+    });
+});
+
+</script>
+
+
+    
+{% endblock %}

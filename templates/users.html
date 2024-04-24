@@ -1,0 +1,147 @@
+{% extends 'base.html'%}
+{%block content%}
+<div class="container dashboard">
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <a class="navbar-brand" href="#"><h1>Dashboard</h1></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto" style="margin-left: 800px;">
+                <li class="nav-item">
+                    <div class="d-flex align-items-center">
+                        <img src="{{url_for('static',filename='asset/profile.jpg')}}" alt="Profile Picture" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 10px;">
+                        <span class="ml-2">Manager</span>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle pl-0" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       <span class="sr-only">Toggle Dropdown</span>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Logout</a>
+                    </div>
+                </li>
+            </ul>   
+        </div>
+    </nav>
+    <div class="row mb-2">
+        
+        <div class="col-auto">
+            <!-- Button to trigger modal for adding new user -->
+         <!-- Button to trigger modal for adding new user -->
+<!-- Button to trigger modal for adding new user -->
+
+    <a href="{{url_for('new_user')}}">
+        <button type="button" class="btn btn-success" style="margin-left: 1050px;">
+            + Add User
+        </button>
+    </a>
+
+        </div>
+        
+
+    </div>
+ <!-- HTML code -->
+<div class="search-bar">
+    <input type="text" placeholder="Search users" class="search-input">
+    <button class="search-button">Search</button>
+</div>
+
+<!-- Profile entry for each user -->
+{% for user in users %}
+<div class="card profile-card">
+    <div class="card-body">
+        <div class="profile-info">
+            <!-- Display user avatar (replace with uploaded photo if available) -->
+            {% if user.cover_photo %}
+            <img src="{{ url_for('static', filename=user.cover_photo) }}" alt="{{ user.username }} " class="avatar">
+            {% else %}
+            <img src="{{ url_for('static', filename='asset/profile.jpg') }}" alt="{{ user.username }} " class="avatar">
+            {% endif %}
+            <div class="info">
+                <!-- Display user fullname -->
+                <h6 class="name">{{ user.username }}</h6>
+                <!-- Display user role -->
+                <p class="role">{{ user.user_role }}</p>
+            </div>
+        </div>
+        <div class="actions">
+            <a href="{{ url_for('edit_profile', user_id=user.id) }}" class="edit-profile" data-userId="{{ user.id }}">
+                <button class="btn view-profile">Edit</button>
+            </a>
+            
+            
+            <i class="fas fa-trash-alt trash-icon delete-profile" data-userid="{{ user._id }}"></i>
+
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+    </div>
+<script>
+        // Add event listener to handle click on trash icon
+// Add event listener to handle click on trash icon
+document.querySelectorAll('.trash-icon').forEach(icon => {
+    icon.addEventListener('click', function() {
+        // Get the user ID associated with the trash icon
+        const userId = this.dataset.userid;
+
+        // Send a DELETE request to the server to delete the user
+        fetch(`/delete_user/${userId}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                // If deletion is successful, reload the page to reflect the changes
+                window.location.reload();
+            } else {
+                // If there was an error, log the error to the console
+                console.error('Failed to delete user:', response.statusText);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    });
+});
+document.querySelectorAll('.edit-profile').forEach(button => {
+    button.addEventListener('click', async (event) => {
+        // Get user ID from data attribute
+        const userId = event.target.dataset.userId;
+
+        // Redirect to edit profile page with user ID
+        window.location.href = `/edit_profile/${userId}`;
+    });
+});
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.querySelector('.search-input');
+    const profileCards = document.querySelectorAll('.profile-card');
+
+    function filterProfiles() {
+        const searchTerm = searchInput.value.trim().toLowerCase();
+
+        profileCards.forEach(card => {
+            const name = card.querySelector('.name').textContent.trim().toLowerCase();
+            const role = card.querySelector('.role').textContent.trim().toLowerCase();
+
+            if (name.includes(searchTerm) || role.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // Filter profiles when search input changes
+    searchInput.addEventListener('input', filterProfiles);
+});
+
+</script>    
+{%endblock%}
+  
+
+ 

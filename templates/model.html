@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container dashboard">
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <a class="navbar-brand" href="#"><h1>Models</h1></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto" style="margin-left: 800px;">
+                <li class="nav-item">
+                    <div class="d-flex align-items-center">
+                        <img src="{{url_for('static',filename='asset/profile.jpg')}}" alt="Profile Picture" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 10px;">
+                        <span class="ml-2">Manager</span>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle pl-0" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       <span class="sr-only">Toggle Dropdown</span>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{{url_for('logout')}}">Logout</a>
+                    </div>
+                </li>
+            </ul>   
+        </div>
+    </nav>
+    <div class="row mb-2">
+        <div class="col-auto">
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addModelModal">
+                <i class="fas fa-plus"></i> Add Model
+            </button>
+            <button type="button" class="btn btn-danger ml-2">
+                <i class="fas fa-times-circle"></i> Delete Model
+            </button>
+        </div>
+    </div>
+    <div class="search-bar">
+        <input type="text" placeholder="Search models" class="search-input">
+        <button class="btn btn-primary search-button">Filter <i class="fas fa-filter"></i></button>
+    </div>
+<!--modal-->
+<!-- Add Model Modal -->
+<div class="modal fade" id="addModelModal" tabindex="-1" role="dialog" aria-labelledby="addModelModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModelModalLabel">Add Model</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addModelForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="modelName">Model Name:</label>
+                        <input type="text" class="form-control" id="modelName" placeholder="Enter model name" name="modelName">
+                    </div>
+                    <div class="form-group">
+                        <label for="modelDescription">Description:</label>
+                        <textarea class="form-control" id="modelDescription" rows="3" placeholder="Enter model description" name="description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="modelLocation">Location:</label>
+                        <select id="locationDropdown" class="form-control" name="location">
+                            <option value="">Select Location</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="modelFile">Model File:</label>
+                        <input type="file" class="form-control-file" id="modelFile" accept=".glb,.obj,.fbx,.gltf,.stl" name="modelFile">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="modelImage">Model Image:</label>
+                        <input type="file" class="form-control-file" id="modelImage" accept="image/png,image/jpeg,image/jpg" name="modelImage">
+                    </div>
+                </form>
+            </div>            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="addModelButton"  onsubmit="addModel(); return false;">Add Model</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+  <!--end of modal-->
+<!--model card section-->
+<div class="container">
+    <div class="row">
+        {% for model in models %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <img src="{{ url_for('static', filename='asset/' + model.image_filename) }}" class="card-img-top" alt="Model Image" style="max-height: 200px;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ model.model_name }}</h5>
+                    
+                    <a href="{{ url_for('view_model', model_id=model._id) }}" class="btn btn-primary">View Model</a>
+                    <a href="{{ url_for('tag_model', model_id=model._id) }}" class="btn btn-info" style="margin-top: 5px;">Tag Model</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+</div>
+
+<script>
+
+// Function to handle form submission
+function addModel() {
+        var formData = new FormData(document.getElementById('addModelForm'));
+
+        fetch('/add_model', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                // Model added successfully, close modal and refresh page
+                $('#addModelModal').modal('hide');
+                location.reload();
+            } else {
+                // Error handling if model addition fails
+                console.error('Failed to add model.');
+            }
+        })
+        .catch(error => {
+            // Error handling for network errors
+            console.error('Network error:', error);
+        });
+    }
+
+    // Event listener for Add Model button
+    document.getElementById('addModelButton').addEventListener('click', addModel);
+
+     // Parse JSON string containing locations data
+     var locationsData = JSON.parse('{{ locations_json | safe }}');
+    
+    // Get dropdown element
+    var locationDropdown = document.getElementById('locationDropdown');
+    
+    // Loop through locations data and populate dropdown options
+    locationsData.forEach(function(location) {
+        var option = document.createElement('option');
+        option.value = location._id;
+        option.textContent = location.name;
+        locationDropdown.appendChild(option);
+    });
+
+</script>
+{% endblock %}

@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container dashboard">
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <a class="navbar-brand" href="#"><h1>Location</h1></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto" style="margin-left: 800px;">
+                <li class="nav-item">
+                    <div class="d-flex align-items-center">
+                        <img src="{{url_for('static',filename='asset/profile.jpg')}}" alt="Profile Picture" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 10px;">
+                        <span class="ml-2">Manager</span>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle pl-0" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       <span class="sr-only">Toggle Dropdown</span>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{{url_for('logout')}}">Logout</a>
+                    </div>
+                </li>
+            </ul>   
+        </div>
+    </nav>
+    <div class="row  mb-2">
+        <div class="col-auto">
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addLocationModal" style="margin-left: 1050px;">
+                +Add Location
+            </button>
+        </div>
+    </div>
+   
+ <!-- HTML code -->
+<div class="search-bar">
+    <input type="text" placeholder="Search users" class="search-input">
+    <button class="search-button">Search</button>
+</div>
+
+<div class="container">
+    <table class="location-table" style="margin-top: 30px; margin-left: -10px;width: 90%; border: none;">
+        <thead style="background-color: grey;">
+            <tr>
+                <th>Name</th>
+                <th>Location</th>
+                <th>Image</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for location in locations %}
+            <tr>
+                <td>{{ location.factory_name }}</td>
+                <td>{{ location.factory_location }}</td>
+                <td><img src="static/asset/{{ location.photo_filename }}" alt="avatar" class="avata"></td>
+                <td>
+                    <button class="edit-button" data-location-id="{{ location._id }}" onclick="editLocation('{{ location._id }}')">Edit</button>
+                    <button class="delete-button" onclick="deleteLocation('{{ location._id }}')">Delete</button>
+                </td>
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- Modal for deletion confirmation -->
+<div class="modal fade" id="deleteLocationModal" tabindex="-1" role="dialog" aria-labelledby="deleteLocationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteLocationModalLabel">Confirm Deletion</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete this location?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteButton">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+<!-- Add Location Modal -->
+<div class="modal fade" id="addLocationModal" tabindex="-1" role="dialog" aria-labelledby="addLocationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addLocationModalLabel">Add Location</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Modal content -->
+                <form id="addLocationForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="factoryName">Factory Name</label>
+                        <input type="text" class="form-control" id="factoryName" name="factoryName" placeholder="Factory Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="factoryLocation">Factory Location</label>
+                        <input type="text" class="form-control" id="factoryLocation" name="factoryLocation" placeholder="Factory Location">
+                    </div>
+                    <div class="form-group">
+                        <label for="photoUpload">Photo Upload</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="photoUpload" name="photoUpload" accept="image/*">
+                            <label class="custom-file-label" for="photoUpload">Choose file</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="addLocationButton">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOMContentLoaded event fired');
+
+    const addLocationForm = document.getElementById('addLocationForm');
+    const addLocationButton = document.getElementById('addLocationButton');
+
+    addLocationButton.addEventListener('click', function () {
+        console.log('Save Changes button clicked');
+
+        // Get the form data
+        const formData = new FormData(addLocationForm);
+
+        // Send the form data to the server via AJAX (you can use fetch or another library like Axios)
+        fetch('/add_location', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Response received:', response);
+
+            if (response.ok) {
+                // If location is successfully saved, display a success toast
+                Toastify({
+                    text: 'Location saved successfully!',
+                    backgroundColor: 'green',
+                    duration: 3000 // 3 seconds
+                }).showToast();
+            } else {
+                // If there was an error, display an error toast
+                Toastify({
+                    text: 'Failed to save location. Please try again.',
+                    backgroundColor: 'red',
+                    duration: 3000 // 3 seconds
+                }).showToast();
+            }
+        })
+        .catch(error => {
+            // If there was a network error, display an error toast
+            console.error('Network error:', error);
+            Toastify({
+                text: 'Network error. Please check your internet connection.',
+                backgroundColor: 'red',
+                duration: 3000 // 3 seconds
+            }).showToast();
+        });
+    });
+});
+$(document).ready(function() {
+    // Function to fetch and display location data
+    function fetchLocations() {
+        $.get("/get_locations", function(data) {
+            // Clear existing table rows
+            $(".location-table tbody").empty();
+
+            // Iterate over location data and append rows to the table
+            data.forEach(function(location) {
+                var row = "<tr>";
+                row += "<td>" + location.name + "</td>";
+                row += "<td>" + location.location + "</td>";
+                row += "<td><img src='" + location.image + "' alt='avatar' class='avatar'></td>";
+                row += "<td><button class='edit-button'>Edit</button> <button class='delete-button'>Delete</button></td>";
+                row += "</tr>";
+                $(".location-table tbody").append(row);
+            });
+        });
+    }
+
+    // Call fetchLocations function initially to load location data
+    fetchLocations();
+
+    // Event listener for adding a new location
+    $("#addLocationButton").click(function() {
+        // Call fetchLocations function after adding a new location to update the table
+        fetchLocations();
+    });
+});
+function editLocation(locationId) {
+    // Perform any necessary actions with the location ID
+    console.log('Edit button clicked for location ID:', locationId);
+}
+
+function deleteLocation(locationId) {
+    // Open the deletion confirmation modal
+    $('#deleteLocationModal').modal('show');
+
+    // Handle deletion confirmation when the user clicks the Delete button in the modal
+    $('#confirmDeleteButton').one('click', function() {
+        // Construct the URL for deleting the location
+        const deleteUrl = `/delete_location/${locationId}`;
+
+        // Send a DELETE request to the server to delete the location
+        fetch(deleteUrl, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                // Location successfully deleted, remove it from the UI
+                $('#locationRow_' + locationId).remove();
+                console.log(`Location with ID ${locationId} deleted successfully.`);
+            } else {
+                // Error handling if deletion fails
+                console.error(`Failed to delete location with ID ${locationId}.`);
+            }
+        })
+        .catch(error => {
+            // Error handling for network errors
+            console.error('Network error:', error);
+        })
+        .finally(() => {
+            // Hide the modal after deletion confirmation
+            $('#deleteLocationModal').modal('hide');
+        });
+    });
+}
+
+function editLocation(locationId) {
+    // Redirect to the edit_location route with the location ID as a parameter
+    window.location.href = `/edit_location/${locationId}`;
+}
+
+</script>
+{% endblock %}

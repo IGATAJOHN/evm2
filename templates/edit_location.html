@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container" style="margin-top: 200px;"> <!-- Add top margin -->
+    
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <fieldset>
+                <legend>Edit Location</legend>
+                <form action="{{ url_for('update_location', location_id=location._id) }}" method="POST" enctype="multipart/form-data">
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label for="factoryName">Factory Name:</label>
+                        <input type="text" id="factoryName" name="factoryName" value="{{ location.factory_name }}" class="form-control">
+                    </div>
+                    <div class="form-group"style="margin-bottom: 20px;">
+                        <label for="factoryLocation">Factory Location:</label>
+                        <input type="text" id="factoryLocation" name="factoryLocation" value="{{ location.factory_location }}" class="form-control">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label for="photoUpload">Photo:</label>
+                        <input type="file" id="photoUpload" name="photoUpload" class="form-control-file">
+                    </div>
+                    <!-- Add input fields for other location attributes as needed -->
+
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </fieldset>
+        </div>
+    </div>
+</div>
+{% endblock %}

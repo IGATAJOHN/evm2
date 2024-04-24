@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Model</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Babylon.js CDN -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <!-- Your custom CSS -->
+    <style>
+        /* Custom styles */
+        #modelCanvas {
+            width: 70%; /* Adjust width as needed */
+            height: 100vh;
+            float: left; /* Float the canvas to the left */
+        }
+
+        .sidebar {
+            width: 30%; /* Adjust width as needed */
+            height: 100vh;
+            background-color: #f8f9fa; /* Light gray background color */
+            float: right; /* Float the sidebar to the right */
+            display: block; /* Initially display the sidebar */
+            overflow-y: auto; /* Enable vertical scrolling if needed */
+        }
+
+        .hide-sidebar {
+            display: none; /* Hide the sidebar when toggled */
+        }
+
+        #collapseBtn {
+            width: 100%; /* Full width button */
+            text-align: center; /* Center align the button text */
+            margin-bottom: 10px; /* Add some margin at the bottom */
+        }
+
+        /* Hamburger button styles */
+        .hamburger {
+            width: 40px;
+            height: 40px;
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 999;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 30px;
+            height: 4px;
+            background-color: #333;
+            margin: 6px auto;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .hamburger span:first-child {
+            margin-top: 0;
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: translateY(10px) rotate(45deg);
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: translateY(-10px) rotate(-45deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Canvas for displaying the 3D model -->
+            <canvas id="modelCanvas"></canvas>
+
+            <!-- Sidebar for additional details -->
+            <div class="sidebar">
+             
+                <div class="accordion" id="modelDetailsAccordion">
+                    <div class="card">
+                        <div class="card-header" id="modelDetailsHeading">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#modelDetailsCollapse" aria-expanded="true" aria-controls="modelDetailsCollapse">
+                                    Input Model Data
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="modelDetailsCollapse" class="collapse show" aria-labelledby="modelDetailsHeading" data-parent="#modelDetailsAccordion">
+                            <div class="card-body">
+                                <form id="modelDataForm">
+                                    <div class="form-group">
+                                        <label for="objectName">Object Name:</label>
+                                        <input type="text" class="form-control" id="objectName" name="objectName">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="location">Location:</label>
+                                        <input type="text" class="form-control" id="location" name="location">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="sampleType">Type of Sample:</label>
+                                        <select class="form-control" id="sampleType" name="sampleType">
+                                            <option value="">Select Sample Type</option>
+                                            {% for sample in samples %}
+                                                <option value="{{ sample._id }}">{{ sample.sample_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="presenceFrequency">Presence Frequency:</label>
+                                        <input type="text" class="form-control" id="presenceFrequency" name="presenceFrequency">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="incident">Incident:</label>
+                                        <textarea class="form-control" id="incident" rows="3" name="incident"></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="evidence">Evidence:</label>
+                                        <input type="file" class="form-control-file" id="evidence" name="evidence">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="customData">Add Custom Data:</label>
+                                        <textarea class="form-control" id="customData" rows="3" name="customData"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          
+        </div>
+    </div>
+
+    <script>
+           // Toggle sidebar visibility
+    
+        // Babylon.js code goes here
+        window.addEventListener('DOMContentLoaded', function(){
+            var canvas = document.getElementById('modelCanvas');
+            var engine = new BABYLON.Engine(canvas, true);
+            var scene;
+
+            // Material for highlighting meshes
+            var highlightMaterial;
+
+            // Array to store selected meshes
+            var selectedMesh;
+
+            // Load the custom 3D mesh
+            BABYLON.SceneLoader.Load("", "../static/models/{{ model_filename }}", engine, function(loadedScene) {
+                scene = loadedScene;
+
+                // Create a default camera
+                var camera = new BABYLON.ArcRotateCamera("camera", 0, Math.PI / 2, 10, BABYLON.Vector3.Zero(), scene);
+                camera.attachControl(canvas, true);
+
+                // Create a light
+                var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+                // Material for highlighting meshes
+                highlightMaterial = new BABYLON.StandardMaterial("highlightMaterial", scene);
+                highlightMaterial.emissiveColor = new BABYLON.Color3(1, 0, 0); // Red
+
+                // Render the scene
+                engine.runRenderLoop(function(){
+                    scene.render();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

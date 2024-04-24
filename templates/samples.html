@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{%block content%}
+<div class="container dashboard">
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <a class="navbar-brand" href="#"><h1>Samples</h1></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto" style="margin-left: 800px;">
+                <li class="nav-item">
+                    <div class="d-flex align-items-center">
+                        <img src="{{url_for('static',filename='asset/profile.jpg')}}" alt="Profile Picture" class="rounded-circle" style="width: 30px; height: 30px; margin-right: 10px;">
+                        <span class="ml-2">Manager</span>
+                    </div>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle pl-0" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                       <span class="sr-only">Toggle Dropdown</span>
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="{{url_for('logout')}}">Logout</a>
+                    </div>
+                </li>
+            </ul>   
+        </div>
+    </nav>
+    <div class="row  mb-2">
+        <div class="col-auto">
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addSampleModal" style="margin-left: 1050px;">
+                +Add Sample
+            </button>
+        </div>
+    </div>
+   
+ <!-- HTML code -->
+<div class="search-bar">
+    <input type="text" placeholder="Search users" class="search-input">
+    <button class="search-button">Search</button>
+</div>
+
+<div class="container">
+ 
+    <table class="location-table" style="margin-top: 30px; margin-left: -10px;width: 90%; border: none;">
+        <thead style="background-color: grey;">
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sample in samples %}
+            <tr>
+                <td>{{ sample.sample_name }}</td>
+                <td>{{ sample.sample_description }}</td>
+                <td><img src="static/asset/{{ sample.photo_filename }}" alt="avatar" class="avata"></td>
+                <td>
+                    <button class="edit-button" data-location-id="{{ sample._id }}" onclick="editSample('{{ sample._id }}')">Edit</button>
+                    <button class="delete-button" onclick="deleteSample('{{ sample._id }}')">Delete</button>
+                </td>
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!-- Add Location Modal -->
+<div class="modal fade" id="addSampleModal" tabindex="-1" role="dialog" aria-labelledby="addSampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addSampleModalLabel">Add Sample</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Modal content -->
+                <form id="addSampleForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="sampleName">Sample Name</label>
+                        <input type="text" class="form-control" id="factoryName" name="sampleName" placeholder="Factory Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="sampleDescription">Sample Description</label>
+                        <input type="text" class="form-control" id="sampleDescription" name="sampleDescription" placeholder="sample description">
+                    </div>
+                    <div class="form-group">
+                        <label for="photoUpload">Photo Upload</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="photoUpload" name="photoUpload" accept="image/*">
+                            <label class="custom-file-label" for="photoUpload">Choose file</label>
+                        </div>
+                    </div> 
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="addSampleButton">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOMContentLoaded event fired');
+
+    const addSampleForm = document.getElementById('addSampleForm');
+    const addSampleButton = document.getElementById('addSampleButton');
+
+    addSampleButton.addEventListener('click', function () {
+        console.log('Save Changes button clicked');
+
+        // Get the form data
+        const formData = new FormData(addSampleForm);
+
+        // Send the form data to the server via AJAX (you can use fetch or another library like Axios)
+        fetch('/add_sample', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Response received:', response);
+
+            if (response.ok) {
+                // If location is successfully saved, display a success toast
+                Toastify({
+                    text: 'sample saved successfully!',
+                    backgroundColor: 'green',
+                    duration: 3000 // 3 seconds
+                }).showToast();
+            } else {
+                // If there was an error, display an error toast
+                Toastify({
+                    text: 'Failed to save sample. Please try again.',
+                    backgroundColor: 'red',
+                    duration: 3000 // 3 seconds
+                }).showToast();
+            }
+        })
+        .catch(error => {
+            // If there was a network error, display an error toast
+            console.error('Network error:', error);
+            Toastify({
+                text: 'Network error. Please check your internet connection.',
+                backgroundColor: 'red',
+                duration: 3000 // 3 seconds
+            }).showToast();
+        });
+    });
+});
+
+function editSample(locationId) {
+    // Perform any necessary actions with the location ID
+    console.log('Edit button clicked for location ID:', locationId);
+}
+
+function deleteSample(sampleId) {
+    // Open the deletion confirmation modal
+    $('#deleteSampleModal').modal('show');
+
+    // Handle deletion confirmation when the user clicks the Delete button in the modal
+    $('#confirmDeleteButton').one('click', function() {
+        // Construct the URL for deleting the location
+        const deleteUrl = `/delete_sample/${sampleId}`;
+
+        // Send a DELETE request to the server to delete the location
+        fetch(deleteUrl, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                // Location successfully deleted, remove it from the UI
+                $('#SampleRow_' + sampleId).remove();
+                console.log(`Sample with ID ${sampleId} deleted successfully.`);
+            } else {
+                // Error handling if deletion fails
+                console.error(`Failed to delete sample with ID ${sampleId}.`);
+            }
+        })
+        .catch(error => {
+            // Error handling for network errors
+            console.error('Network error:', error);
+        })
+        .finally(() => {
+            // Hide the modal after deletion confirmation
+            $('#deleteSampleModal').modal('hide');
+        });
+    });
+}
+
+function editSample(sampleId) {
+    // Redirect to the edit_location route with the location ID as a parameter
+    window.location.href = `/edit_sample/${sampleId}`;
+}
+
+</script>
+{%endblock%}

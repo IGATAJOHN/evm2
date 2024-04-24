@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tag Model</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Babylon.js CDN -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Your custom CSS -->
+    <style>
+/* Custom styles */
+body {
+    overflow: hidden;
+    margin: 0; /* Remove default body margin */
+    padding: 0; /* Remove default body padding */
+}
+
+.container-fluid {
+    padding: 0; /* Remove default container padding */
+}
+
+#modelCanvasContainer {
+    width: 70%; /* Canvas occupies 70% of the width */
+    height: 100vh; /* Full viewport height */
+    float: left;
+    position: relative; /* Add position relative */
+}
+
+#modelCanvas {
+    width: 100%; /* Canvas occupies full width of its container */
+    height: 100%; /* Canvas occupies full height of its container */
+}
+
+.sidebar {
+    width: 30%; /* Sidebar occupies 30% of the width */
+    height: 100vh; /* Full viewport height */
+    background-color: #f8f9fa; /* Light gray background color */
+    float: right;
+    overflow-y: auto;
+}
+
+.circle {
+    position: absolute;
+    bottom: 10px;
+    margin-left: 20px;
+    left: 10px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: rgba(236, 236, 236, 0.4); /* Semi-transparent white background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+button {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #000;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+#moveForward {
+    top: 0;
+    left: calc(50% - 25px);
+}
+
+#turnLeft {
+    top: calc(50% - 25px);
+    left: 0;
+}
+
+#moveBackward {
+    bottom: 0;
+    left: calc(50% - 25px);
+}
+
+#turnRight {
+    top: calc(50% - 25px);
+    right: 0;
+}
+.one {
+    left: 200px;
+    width: 600px;
+    bottom: 120px;
+    height: 100px;
+    background-color: rgba(236, 236, 236, 0.4);
+    font-size: 24px;
+    cursor: pointer;
+    border-radius: 10px;
+    display: flex; /* Make the container flex */
+    align-items: center; /* Align items vertically in the center */
+    justify-content: space-between; /* Add space between buttons */
+    padding: 0 10px; /* Add padding to the container */
+    z-index: 999;
+}
+
+/* Style for individual buttons */
+.one button {
+    margin: 10px; /* Remove default button margin */
+}
+/* Additional styling for specific buttons if needed */
+/* Add specific styles for individual buttons if needed */
+.myimg{
+    left: 800px;
+    width: 50px;
+    bottom: 295px;
+    height: 50px;
+    background-color: transparent;
+    font-size: 24px;
+    cursor: pointer;
+    /* border-radius: 10px; */
+    display: flex; /* Make the container flex */
+    align-items: center; /* Align items vertically in the center */
+    justify-content: space-between; /* Add space between buttons */
+    padding: 0 10px; 
+    z-index: 999;
+}
+
+
+/* Add hover effect */
+
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Canvas for displaying the 3D model -->
+                 <!-- Canvas container -->
+                 <div id="modelCanvasContainer">
+                    <canvas id="modelCanvas"></canvas>
+                    <!-- Circular button arrangement -->
+                    <div class="circle">
+                        <button id="moveForward" class="btn">▲</button>
+                        <button id="turnLeft" class="btn" style="background-color: transparent;">◀</button>
+                        <button id="moveBackward" class="btn">▼</button>
+                        <button id="turnRight" class="btn">▶</button>
+                    </div>
+                    <nav class="navbar navbar-expand-lg bg-body-tertiary one">
+                        <div class="container-fluid">
+                            <button class="btn btn-outline-light" id="zoomOutButton" style="margin-left: 10px;"><i class="fas fa-search-minus"></i></button>
+                          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                          </button>
+                          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                              <li class="nav-item">
+                                <button class="btn btn-outline-light" id="zoomInButton" style="margin-left: 80px;bottom: 14px;"><i class="fas fa-search-plus"></i></button>
+                              </li>
+                              <li class="nav-item">
+                                <a class="nav-link" href="#"> <button class="btn btn-outline-light" id="recordVideoButton" style="margin-left: 150px;bottom: 14px;"><i class="fas fa-video"></i></button></a>
+                              </li>
+                              <li class="nav-item">
+                                <a class="nav-link" href="#"><button class="btn btn-outline-light" id="screenshotButton" style="margin-left: 220px; bottom: 14px;"><i class="fas fa-camera"></i></button></a>
+                              </li>
+                              <li class="nav-item">
+                                <a class="nav-link" href="#"><button class="btn" id="heatmap" style="margin-left: 260px; bottom: 14px; width: 130px; color: white;font-size: 20px;">Heat Map</button></a>
+                              </li>
+                            </ul>
+                          </div>
+                        </div>
+                      
+                      </nav>
+                      <div class="card myimg" style="width: 18rem;">
+                        <img class="card-img-top" src="../static/asset/Group 26986.png" alt="Card image cap">
+                        
+                      </div>
+                </div>
+            
+            <!-- Sidebar for additional details -->
+            <div class="sidebar">
+                    <div class="card" style="height: 100vh;">
+                        <div id="modelDetailsCollapse" class="collapse show" aria-labelledby="modelDetailsHeading" data-parent="#modelDetailsAccordion">
+                            <div class="card-body">
+                                <form id="modelDataForm">
+                                    <div class="form-group">
+                                        <label for="objectName">Object Name:</label>
+                                        <input type="text" class="form-control" id="objectName" name="objectName">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="location">Location:</label>
+                                        <select class="form-control" id="locationType" name="locationType">
+                                            <option value="">Select Location</option>
+                                            {% for location in locations %}
+                                                <option value="{{ location._id }}">{{ location.factory_location }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="sampleType">Type of Sample:</label>
+                                        <select class="form-control" id="sampleType" name="sampleType">
+                                            <option value="">Select Sample Type</option>
+                                            {% for sample in samples %}
+                                                <option value="{{ sample._id }}">{{ sample.sample_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="presenceFrequency">Presence Frequency:</label>
+                                        <input type="number" class="form-control" id="presenceFrequency" name="presenceFrequency">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="incident">Incident:</label>
+                                        <input type='text' class="form-control" id="incident" name="incident">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="evidence">Evidence:</label>
+                                        <input type="file" class="form-control-file" id="evidence" name="evidence">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" id="formSubmitButton" style="width: 80px; height: 50px;">Submit</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+        </div>
+    </div>
+    
+    <!-- <div id="toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3000">
+        <div class="toast-header">
+          <strong class="mr-auto">Form Submitted</strong>
+          <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="toast-body">
+          Your form has been submitted successfully!
+        </div>
+      </div> -->
+      <div id="modelData" data-model-filename="{{ model_filename }}"></div>
+    <script src="../static/js/app.bundle.js">
+       
+    </script>
+</body> 
+</html>
