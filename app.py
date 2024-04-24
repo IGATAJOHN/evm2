@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, request, url_for, flash, session,jsonify,send_file,abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -5,20 +6,21 @@ from datetime import datetime, timedelta
 from flask_login import LoginManager, login_user, logout_user, login_required, UserMixin, current_user
 import pymongo
 from pymongo import MongoClient
-from dotenv import load_dotenv
 import os
 import json
 from bson import ObjectId
-app = Flask(__name__, static_url_path='/static', static_folder='static')
-# Access environment variables
+# Load environment variables from .env file
 load_dotenv()
+
+# Access environment variables
 MONGODB_URI = os.getenv('MONGODB_URI')
 SESSION_TIMEOUT = int(os.getenv('SESSION_TIMEOUT'))
+app = Flask(__name__, static_url_path='/static', static_folder='static')
 app.config['SESSION_TIMEOUT'] = 300
 app.config['UPLOAD_FOLDER'] = 'static/asset'
 app.config['MODEL_FOLDER']='static/models'
-client = MongoClient('mongodb://localhost:27017/')
-db = client.mydatabase  # Replace 'mydatabase' with your database name
+client = MongoClient(MONGODB_URI)
+db = client.supportdb  # Replace 'mydatabase' with your database name
 users_collection = db.users  # Replace 'users' with your collection name
 locations_collection = db.locations
 models_collection=db.models
